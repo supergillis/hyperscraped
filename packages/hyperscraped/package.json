@@ -1,0 +1,45 @@
+{
+  "name": "hyperscraped",
+  "version": "0.0.1",
+  "description": "Lightweight scraper written in TypeScript using ES6 generators.",
+  "keywords": [
+    "es6-generators",
+    "scrape",
+    "scraper",
+    "scraping",
+    "typescript",
+    "web-scraping"
+  ],
+  "author": {
+    "name": "Gillis Van Ginderacter",
+    "email": "supergillis@gmail.com",
+    "url": "https://github.com/supergillis"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/supergillis/hyperscraped.git"
+  },
+  "license": "GPLv3",
+  "scripts": {
+    "build": "pnpx tsc -p tsconfig.json && pnpx tsc -p tsconfig.esm.json",
+    "prepublishOnly": "pnpm run build",
+    "prepack": "cp ../../README.md .",
+    "postpack": "rm README.md"
+  },
+  "main": "./dist/cjs/index.js",
+  "types": "./dist/cjs/index.d.ts",
+  "module": "./dist/esm/index.js",
+  "dependencies": {
+    "css-select": "^3.1.2",
+    "domhandler": "^4.0.0",
+    "domutils": "^2.4.4"
+  },
+  "peerDependencies": {
+    "css-select": "^3.1.2",
+    "domhandler": "^4.0.0",
+    "domutils": "^2.4.4"
+  },
+  "devDependencies": {
+    "typescript": "^4.1.3"
+  }
+}
