@@ -32,7 +32,8 @@
   "dependencies": {
     "css-select": "^3.1.2",
     "domhandler": "^4.0.0",
-    "domutils": "^2.4.4"
+    "domutils": "^2.4.4",
+    "fast-merge-async-iterators": "^1.0.5"
   },
   "peerDependencies": {
     "css-select": "^3.1.2",

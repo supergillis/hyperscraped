@@ -24,7 +24,7 @@ npm install --save hyperscraped
 
 ## Examples
 
-- [Scrape HackerNews](./examples/hacker-news/src/index.ts)
+- [Scrape Hacker News](./examples/hacker-news/src/index.ts)
 
 ## Modules
 
