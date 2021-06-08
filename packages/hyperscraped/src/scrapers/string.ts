@@ -1,38 +1,38 @@
-import { Node } from '../scraper';
-import { Mapper, map } from './functional';
-import { getText } from './dom';
+import { Node, Scraper } from '../scraper';
+import { text } from './dom';
+import * as E from 'fp-ts/Either';
 
-export const number: Mapper<string | Node, number> = map(function number(value) {
+export const number: Scraper<string | Node, E.Either<string, number>> = function number(value) {
   try {
-    return parseInt(getText(value));
+    return E.right(parseInt(text(value)));
   } catch {
-    return undefined;
+    return E.left(`Cannot parse number ${value}`);
   }
-});
+};
 
-export const regex = (pattern: RegExp): Mapper<string, string> =>
-  map(function regex(text) {
-    const match = text.match(pattern);
-    if (match) {
-      return undefined;
-    }
-    return text;
-  });
-
-export function match(pattern: RegExp): Mapper<string | Node, RegExpMatchArray>;
-export function match(pattern: RegExp, key: string | number): Mapper<string | Node, string>;
-export function match(pattern: RegExp, key?: string | number): Mapper<string | Node, string | RegExpMatchArray> {
-  return map(function match(value) {
-    const text = getText(value);
+export const regex = (pattern: RegExp): Scraper<string, E.Either<string, string>> =>
+  function regex(text) {
     const match = text.match(pattern);
     if (!match) {
-      return undefined;
+      return E.left(`Could not match regex "${pattern}" against "${text}"`);
+    }
+    return E.right(text);
+  };
+
+export function match(pattern: RegExp): Scraper<string | Node, E.Either<string, RegExpMatchArray>>;
+export function match(pattern: RegExp, key: string | number): Scraper<string | Node, E.Either<string, string>>;
+export function match(pattern: RegExp, key?: string | number) {
+  return function match(value: string | Node): E.Either<string, string | RegExpMatchArray> {
+    const str = text(value);
+    const match = str.match(pattern);
+    if (!match) {
+      return E.left(`Could not match regex "${pattern}" against "${str}"`);
     }
     if (typeof key === 'string') {
-      return match.groups?.[key];
+      return E.fromNullable(`Could not find key "${key}" in match groups`)(match.groups?.[key]);
     } else if (typeof key === 'number') {
-      return match?.[key];
+      return E.fromNullable(`Could not find key "${key}" in match`)(match?.[key]);
     }
-    return match;
-  });
+    return E.of(match);
+  };
 }
