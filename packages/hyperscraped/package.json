@@ -1,6 +1,6 @@
 {
   "name": "hyperscraped",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Lightweight scraper written in TypeScript using ES6 generators.",
   "keywords": [
     "es6-generators",
@@ -21,6 +21,7 @@
   },
   "license": "GPLv3",
   "scripts": {
+    "test": "pnpx ava",
     "build": "pnpx tsc -p tsconfig.json && pnpx tsc -p tsconfig.esm.json",
     "prepublishOnly": "pnpm run build",
     "prepack": "cp ../../README.md .",
@@ -42,6 +43,20 @@
     "fp-ts": "^2.10.5"
   },
   "devDependencies": {
+    "ava": "^3.15.0",
+    "ts-node": "^10.0.0",
     "typescript": "^4.3.2"
+  },
+  "ava": {
+    "files": [
+      "src/**/*.spec.ts"
+    ],
+    "extensions": [
+      "ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ],
+    "failWithoutAssertions": false
   }
 }

@@ -1,21 +1,15 @@
 import { Node, Scraper } from '../scraper';
-import * as E from 'fp-ts/Either';
-import * as T from 'fp-ts/Task';
+import { flow, pipe } from 'fp-ts/lib/function';
+import * as A from 'fp-ts/ReadonlyArray';
 import * as TE from 'fp-ts/TaskEither';
-
-export type RecursivePartial<T> = {
-  [P in keyof T]?: T[P] extends (infer U)[]
-    ? RecursivePartial<U>[]
-    : T[P] extends object
-    ? RecursivePartial<T[P]>
-    : T[P];
-};
 
 export type PropertyScraper<O> = {
   [P in keyof O]: Scraper<Node, TE.TaskEither<any, O[P]>>;
 };
 
-export type PartialPropertyScraper<O> = PropertyScraper<RecursivePartial<O>>;
+export type PropertyTaskEither<O> = {
+  [P in keyof O]: TE.TaskEither<any, O[P]>;
+};
 
 type ObjectEntry<T> = {
   [K in keyof T]: [K, T[K]];
@@ -23,27 +17,22 @@ type ObjectEntry<T> = {
 
 type ObjectEntries<T> = ObjectEntry<T>[];
 
-export const object = <O>(
-  propertyTransforms: PartialPropertyScraper<O>,
-): Scraper<Node, T.Task<RecursivePartial<O>>> => {
-  const entries = Object.entries(propertyTransforms) as ObjectEntries<PartialPropertyScraper<O>>;
-  return (node): T.Task<RecursivePartial<O>> => {
-    return async function () {
-      const result: RecursivePartial<O> = {};
-      for (const [property, scraper] of entries) {
-        if (result[property]) {
-          throw new Error(`Property "${property}" is already set to "${result[property]}"`);
-        }
-        const taskEither = scraper(node);
-        const either = await taskEither();
-        if (E.isRight(either)) {
-          result[property] = either.right;
-        } else {
-          console.log(`Error while scraping value for property ${property}`);
-          console.warn(either.left);
-        }
-      }
-      return result;
-    };
-  };
+export const object = <O>(propertyTasks: PropertyScraper<O>): Scraper<Node, TE.TaskEither<any, O>> => {
+  const entries = Object.entries(propertyTasks) as ObjectEntries<PropertyScraper<O>>;
+
+  // List of scrapers that result in TaskEither<any, { property, value }>
+  const scrapers = pipe(
+    entries,
+    A.map(([property, scraper]) =>
+      flow(
+        scraper,
+        TE.map((value) => ({ property, value })),
+      ),
+    ),
+  );
+  return flow(
+    (node) => scrapers.map((scraper) => scraper(node)),
+    TE.sequenceArray,
+    TE.map(A.reduce({}, (result, { property, value }) => ({ ...result, [property]: value }))),
+  ) as Scraper<Node, TE.TaskEither<any, O>>;
 };
