@@ -17,18 +17,19 @@ function compile(selector: Selector): (node: Node) => boolean {
  */
 export const selectOne = (selector: Selector): Scraper<Node, E.Either<string, Node>> => {
   const query = compile(selector);
+  const toEither = E.fromNullable(`Cannot find element "${selector}"`);
   return function selectOne(node) {
-    return E.fromNullable(`Cannot find element "${selector}"`)(cssSelectOne(query, node));
+    return toEither(cssSelectOne(query, node));
   };
 };
 
 /**
  * Create a scraper that selects and transforms all elements matching the given selector.
  */
-export const selectAll = (selector: Selector): Scraper<Node, AsyncIterableIterator<Node>> => {
+export const selectAll = (selector: Selector): Scraper<Node, Node[]> => {
   const query = compile(selector);
-  return async function* selectAll(node) {
-    yield* cssSelectAll(query, node);
+  return function selectAll(node) {
+    return cssSelectAll(query, node);
   };
 };
 

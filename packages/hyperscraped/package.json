@@ -1,6 +1,6 @@
 {
   "name": "hyperscraped",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Lightweight scraper written in TypeScript using ES6 generators.",
   "keywords": [
     "es6-generators",
