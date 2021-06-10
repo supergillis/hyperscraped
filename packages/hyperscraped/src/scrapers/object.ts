@@ -7,10 +7,6 @@ export type PropertyScraper<O> = {
   [P in keyof O]: Scraper<Node, TE.TaskEither<any, O[P]>>;
 };
 
-export type PropertyTaskEither<O> = {
-  [P in keyof O]: TE.TaskEither<any, O[P]>;
-};
-
 type ObjectEntry<T> = {
   [K in keyof T]: [K, T[K]];
 }[keyof T];
@@ -31,8 +27,16 @@ export const object = <O>(propertyTasks: PropertyScraper<O>): Scraper<Node, TE.T
     ),
   );
   return flow(
+    // Run scrapers
     (node) => scrapers.map((scraper) => scraper(node)),
+    // Combine in single TaskEither of array
     TE.sequenceArray,
-    TE.map(A.reduce({}, (result, { property, value }) => ({ ...result, [property]: value }))),
+    // Reduce into a single object
+    TE.map(
+      A.reduce({}, (result, { property, value }) => ({
+        ...result,
+        [property]: value,
+      })),
+    ),
   ) as Scraper<Node, TE.TaskEither<any, O>>;
 };
