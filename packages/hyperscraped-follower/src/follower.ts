@@ -19,7 +19,7 @@ export const requestT = createRequester();
 
 export const createJsonRequester =
   (init: RequestInit = { timeout: 10000 }) =>
-  (url: string): TE.TaskEither<any, Document> =>
+  (url: string): TE.TaskEither<any, any> =>
     TE.tryCatch(
       async () => {
         const response = await fetch(url, init);
