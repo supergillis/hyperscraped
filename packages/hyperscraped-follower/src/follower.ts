@@ -16,3 +16,16 @@ export const createRequester =
     );
 
 export const requestT = createRequester();
+
+export const createJsonRequester =
+  (init: RequestInit = { timeout: 10000 }) =>
+  (url: string): TE.TaskEither<any, Document> =>
+    TE.tryCatch(
+      async () => {
+        const response = await fetch(url, init);
+        return await response.json();
+      },
+      (error) => error,
+    );
+
+export const requestJsonT = createJsonRequester();
