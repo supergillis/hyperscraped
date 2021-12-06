@@ -1,9 +1,7 @@
-import fetch from 'node-fetch';
-import { parseDocument } from 'htmlparser2';
-import { flow } from 'fp-ts/function';
+import { flow, pipe } from 'fp-ts/function';
 import { attr, match, next, number, object, selectAll, selectOne, text } from 'hyperscraped/src';
-import { requestT } from 'hyperscraped-follower/src';
-import * as I from 'iterators-ts';
+import { requestDocumentT } from 'hyperscraped-follower/src';
+import * as A from 'fp-ts/Array';
 import * as E from 'fp-ts/Either';
 import * as TE from 'fp-ts/TaskEither';
 
@@ -88,21 +86,23 @@ const scrapePostObject = object<Post>({
     TE.orElse(() => TE.of<any, number | undefined>(undefined)),
   ),
   // Get the related page
-  page: flow(scrapeHref, TE.fromEither, TE.chain(requestT), TE.chain(scrapePageObject)),
+  page: flow(scrapeHref, TE.fromEither, TE.chain(requestDocumentT), TE.chain(scrapePageObject)),
 });
 
 // Find the row that contains most of the data and parse the element as an object using the given scrapers
-const posts = flow(selectAll('tr.athing'), I.flatMap(scrapePostObject));
+const posts = flow(selectAll('tr.athing'), A.map(scrapePostObject));
+
+const scrape = flow(
+  requestDocumentT, //
+  TE.map(posts),
+  TE.chain(A.sequence(TE.ApplicativeSeq)),
+);
 
 async function main() {
-  const content = await fetch('https://news.ycombinator.com/');
-  const root = parseDocument(await content.text());
+  const task = scrape('https://news.ycombinator.com/');
+  const result = await task();
 
-  for await (const postT of posts(root)) {
-    // Log all posts to the console
-    const post = await postT();
-    console.log(post);
-  }
+  pipe(result, E.map(A.map((post) => console.log(post))));
 }
 
 main();

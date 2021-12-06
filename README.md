@@ -1,6 +1,6 @@
 # hyperscraped
 
-Lightweight scraper written in TypeScript using ES6 generators.
+Lightweight scrape functions written in TypeScript. Works well with [`fp-ts`](https://github.com/gcanti/fp-ts).
 
 <div>
   <a href="https://www.npmjs.com/package/hyperscraped">
@@ -13,8 +13,6 @@ Lightweight scraper written in TypeScript using ES6 generators.
     <img alt="license" src="https://img.shields.io/npm/l/hyperscraped?label=license&color=green"/>
   </a>
 </div>
-
-The syntax of this library is inpired by the [`hyperscript`](https://github.com/hyperhype/hyperscript) library.
 
 ## Installation
 
